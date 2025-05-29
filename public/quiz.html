@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz</title>
+    <link rel="stylesheet" href="Stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <nav>
+        <a href="Introduction.html">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="About.html">
+            <i class="fas fa-user"></i>
+            <span>About</span>
+        </a>
+        <a href="quiz.html" class="active">
+            <i class="fas fa-gamepad"></i>
+            <span>Quiz</span>
+        </a>
+    </nav>
+
+    <header>
+        <h1 id="mainHeader">Quiz Challenge</h1>
+        <div id="gameHeader">
+            <div class="scores">
+                <span>You: <span id="headerMyScore">0</span></span>
+                <span>Opponent: <span id="headerOpponentScore">0</span></span>
+            </div>
+            <div class="timer" id="headerTimer">Time left: 10 seconds</div>
+        </div>
+        <div id="resultHeader"></div>
+    </header>
+
+    <main>
+        <div id="quiz-container">
+            <div id="loginPanel" class="card">
+                <input type="text" id="nameInput" placeholder="Enter your name">
+                <button onclick="joinGame()" id="joinButton">Join Game</button>
+            </div>
+
+            <div id="playersPanel" class="card hidden">
+                <h3 class="players-subtitle">Online Players</h3>
+                <div id="playersList"></div>
+            </div>
+
+            <div id="gamePanel" class="card hidden">
+                <div id="questionContainer"></div>
+            </div>
+
+            <div id="victoryPanel" class="card hidden">
+                <div id="finalScores">
+                    <p>Your Score: <span id="finalMyScore"></span></p>
+                    <p>Opponent's Score: <span id="finalOpponentScore"></span></p>
+                </div>
+                <button onclick="backToPlayersList()" id="backButton">Back to Lobby</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>The small quiz chanllenge</p>
+    </footer>
+
+    <script>
+        const socket = io();
+        let currentGameId;
+        let players = [];
+        let countdownTimer;
+        let isGameOver = false;
+
+        function resetTimer() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+        }
+
+        function toggleGameHeader(show) {
+            const mainHeader = document.getElementById('mainHeader');
+            const gameHeader = document.getElementById('gameHeader');
+            mainHeader.style.display = show ? 'none' : 'block';
+            gameHeader.style.display = show ? 'flex' : 'none';
+        }
+
+        function updateHeaderText(text) {
+            document.getElementById('mainHeader').textContent = text;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('playersList').addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button || !button.dataset.id) return;
+
+                // 新增：检查玩家是否在游戏中
+                if (button.disabled) {
+                    const playerName = button.textContent.replace('(In Game)', '').trim();
+                    alert(`${playerName} is currently in a game.\nPlease choose another opponent.`);
+                    return;
+                }
+
+                challenge(button.dataset.id);
+            });
+        });
+
+        function joinGame() {
+            const name = document.getElementById('nameInput').value.trim();
+            const joinButton = document.getElementById('joinButton');
+            if (!name) {
+                alert("Please enter your name");
+                return;
+            }
+            
+            joinButton.disabled = true;
+            joinButton.textContent = "Joining...";
+            socket.emit('join', name);
+            updateHeaderText('Choose Your Opponent');
+        }
+
+        function challenge(targetId) {
+            if (!targetId) {
+                alert("Invalid player ID");
+                return;
+            }
+            socket.emit('challenge', targetId);
+        }
+
+        socket.on('nameConflict', () => {
+            alert('Username is already taken!');
+            const joinButton = document.getElementById('joinButton');
+            joinButton.disabled = false;
+            joinButton.textContent = 'Join Game';
+            updateHeaderText('Quiz Challenge');
+        });
+
+        socket.on('error', (message) => {
+            alert(`Error: ${message}`);
+        });
+
+        socket.on('updatePlayers', (onlinePlayers) => {
+            players = onlinePlayers;
+            const currentPlayer = players.find(p => p.id === socket.id);
+            
+            if (currentGameId && !isGameOver) {
+                return;
+            }
+
+            if (isGameOver) {
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('playersPanel').classList.add('hidden');
+                document.getElementById('gamePanel').classList.add('hidden');
+                updateHeaderText('Quiz Challenge');
+                return;
+            }
+            
+            if (currentPlayer && !currentPlayer.inGame) {
+                document.getElementById('loginPanel').classList.add('hidden');
+                document.getElementById('playersPanel').classList.remove('hidden');
+                updateHeaderText('Choose Your Opponent');
+            } else {
+                document.getElementById('loginPanel').classList.remove('hidden');
+                document.getElementById('playersPanel').classList.add('hidden');
+                updateHeaderText('Quiz Challenge');
+            }
+
+            document.getElementById('playersList').innerHTML = players
+                .filter(p => p.id !== socket.id)
+                .map(p => `
+                    <button 
+                        data-id="${p.id}" 
+                        ${p.inGame ? 'disabled class="disabled-btn"' : ''}
+                        title="${p.inGame ? 'Player is in game' : 'Click to challenge'}"
+                    >
+                        ${p.name} ${p.inGame ? '(In Game)' : ''}
+                    </button>
+                `).join('');
+        });
+
+        socket.on('challengeReceived', ({ challengerId, challengerName }) => {
+            if (confirm(`${challengerName} has challenged you! Accept?`)) {
+                socket.emit('acceptChallenge', { challengerId });
+            }
+        });
+
+        socket.on('gameStart', (gameId) => {
+            currentGameId = gameId;
+            document.getElementById('gamePanel').classList.remove('hidden');
+            document.getElementById('playersPanel').classList.add('hidden');
+            toggleGameHeader(true);
+        });
+
+        socket.on('newQuestion', (question) => {
+            resetTimer();
+
+            let timeLeft = 10;
+            const timerElement = document.getElementById('headerTimer');
+            
+            timerElement.textContent = `Time left: 10 seconds`;
+            
+            document.getElementById('questionContainer').innerHTML = `
+                <h3>Question ${question.round}</h3>
+                <p>${question.question}</p>
+                <div class="options">
+                    ${question.options.map(opt => `
+                        <button onclick="submitAnswer('${opt}')">${opt}</button>
+                    `).join('')}
+                </div>
+            `;
+
+            countdownTimer = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = `Time left: ${timeLeft} seconds`;
+                
+                if (timeLeft <= 0) {
+                    resetTimer();
+                    document.querySelectorAll('#questionContainer button').forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.backgroundColor = "#ff4444";
+                    });
+                    socket.emit('timeout', { gameId: currentGameId });
+                }
+            }, 1000);
+        });
+
+        socket.on('clearTimer', () => {
+            resetTimer();
+            document.getElementById('headerTimer').textContent = "Loading next question...";
+        });
+
+        socket.on('updateScores', (scores) => {
+            const myScore = scores[socket.id] || 0;
+            const opponentId = Object.keys(scores).find(id => id !== socket.id);
+            const opponentScore = scores[opponentId] || 0;
+            
+            document.getElementById('headerMyScore').textContent = myScore;
+            document.getElementById('headerOpponentScore').textContent = opponentScore;
+        });
+
+        socket.on('gameOver', (scoresString) => {
+            const scores = JSON.parse(scoresString);
+            const myScore = scores[socket.id] || 0;
+            const opponentId = Object.keys(scores).find(id => id !== socket.id);
+            const opponentScore = scores[opponentId] || 0;
+            
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('gameHeader').style.display = 'none';
+            
+            const resultHeader = document.getElementById('resultHeader');
+            let resultMessage;
+            if (myScore > opponentScore) {
+                resultMessage = 'Congratulations! You won!';
+            } else if (myScore < opponentScore) {
+                resultMessage = 'You lost. Better luck next time!';
+            } else {
+                resultMessage = "It's a tie!";
+            }
+            resultHeader.innerHTML = resultMessage;
+            resultHeader.style.display = 'block';
+
+            document.getElementById('finalMyScore').textContent = myScore;
+            document.getElementById('finalOpponentScore').textContent = opponentScore;
+            
+            isGameOver = true;
+            document.getElementById('loginPanel').classList.add('hidden');
+            document.getElementById('playersPanel').classList.add('hidden');
+            document.getElementById('gamePanel').classList.add('hidden');
+            document.getElementById('victoryPanel').classList.remove('hidden');
+        });
+
+        function backToPlayersList() {
+            document.getElementById('resultHeader').style.display = 'none';
+            document.getElementById('mainHeader').style.display = 'block';
+            
+            isGameOver = false;
+            document.getElementById('victoryPanel').classList.add('hidden');
+            document.getElementById('playersPanel').classList.remove('hidden');
+            document.getElementById('loginPanel').classList.add('hidden');
+            currentGameId = null;
+            socket.emit('requestPlayerListUpdate');
+            updateHeaderText('Choose Your Opponent');
+            toggleGameHeader(false);
+        }
+
+        socket.on('disableOptions', () => {
+            document.querySelectorAll('#questionContainer button').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+            });
+        });
+
+        function submitAnswer(answer) {
+            if (!currentGameId) return;
+            socket.emit('submitAnswer', { 
+                answer: answer, 
+                gameId: currentGameId 
+            });
+        }
+    </script>
+</body>
+</html>

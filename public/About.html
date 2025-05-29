@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About Me</title>
+    <link rel="stylesheet" href="Stylesheet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <a href="Introduction.html">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="About.html" class="active">
+            <i class="fas fa-user"></i>
+            <span>About</span>
+        </a>
+        <a href="quiz.html">
+            <i class="fas fa-gamepad"></i>
+            <span>Quiz</span>
+        </a>
+    </nav>
+
+    <header class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-btn" data-tab="skills">
+                <i class="fas fa-code"></i>
+                <span>Skills</span>
+            </button>
+            <button class="tab-btn" data-tab="contact">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </button>
+            <button class="tab-btn" data-tab="hobbies">
+                <i class="fas fa-heart"></i>
+                <span>Hobby</span>
+            </button>
+            <button class="tab-btn" data-tab="education">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Courses</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="tab-container">
+        <div id="default-content">
+            <i class="fas fa-mouse-pointer fa-2x"></i>
+            <p>Click the above tag to kown more detail</p>
+        </div>
+
+        <div id="skills" class="tab-content">
+            <h3>Skills</h3>
+            <p>
+                Python<br>
+                Java<br>
+                MySQL<br>
+                Web(HTML, CSS,Javascript)<br>
+                Deep learning(Pytorch)<br>
+                Visualization(Python)<br>
+            </p>
+        </div>
+
+        <div id="contact" class="tab-content">
+            <h3>Contact</h3>
+            <p>
+                Emaile:<br>
+                w.ke.23@abdn.ac.uk<br>
+                20233802009@m.scnu.edu.cn<br>
+                GitHub:github.com/JNDQXGYA<br>
+                WeChat:K13532166135<br>
+                Phone:13532166135<br>
+            </p>
+        </div>
+
+        <div id="hobbies" class="tab-content">
+            <h3>Hobby</h3>
+            <p>
+                Reading<br>
+                Music<br>
+                Basketball<br>
+                Running<br>
+                Sleeping<br>
+                Table tennis<br>
+            </p>
+        </div>
+
+        <div id="education" class="tab-content">
+            <h3>Courses</h3>
+            <p>
+                Python Programming Foundation<br>
+                Object-Oriented Programming<br>
+                Computer Architecture<br>
+                Java Programming<br>
+                Intriduction to Software Engineering<br>
+                Algrothm Design and Analysis<br>
+                Operating System Principkes<br>
+                Principles and Practice of Database Systems<br>
+                Web Application Development<br>
+            </p>
+        </div>
+    </main>
+    <footer>
+        <p>The more information about me</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const defaultContent = document.getElementById('default-content');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        
+        tabContents.forEach(content => {
+            content.style.display = 'none';
+        });
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                const isActive = this.classList.contains('active');
+            
+                // 重置所有按钮和内容
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.style.display = 'none');
+
+                if (isActive) {                   
+                    defaultContent.style.display = 'block';
+                } else {
+                    document.getElementById(tabId).style.display = 'block';
+                    this.classList.add('active');
+                    defaultContent.style.display = 'none';
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

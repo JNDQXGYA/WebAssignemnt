@@ -1,0 +1,219 @@
+/* ========== 全局重置 ========== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== 基础样式 ========== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: beige;
+  padding: 12px 0;
+  min-width: 320px;
+}
+
+/* ========== 公共容器样式 ========== */
+nav, header, main, footer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ========== 导航栏样式 ========== */
+nav {
+  background-color: #0499ef;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 0;
+  border-radius: 8px 8px 0 0;
+}
+
+nav a {
+  flex: 1;
+  text-align: center;
+  color: white;
+  text-decoration: none;
+  padding: 10px 0;
+  transition: all 0.3s ease;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+nav a:last-child {
+  border-right: none;
+}
+
+nav a:hover,
+nav a.active {
+  background-color: #4CAF50;
+  border-radius: 8px 8px 0 0;
+}
+
+/* ========== 头部区域 ========== */
+header {
+  background: linear-gradient(135deg, #0499ef 0%, #0066cc 100%);
+  color: pink;
+  padding: 1.2rem 20px;
+  text-align: center;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid gold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  margin: 0 auto 1rem;
+  display: block;
+  object-fit: cover;
+}
+
+/* ========== 选项卡按钮样式 ========== */
+.tab-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 0 10px;
+  gap: 10px;
+}
+
+.tab-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 22px;
+  border: 2px solid pink;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 8px;
+}
+
+.tab-btn:hover,
+.tab-btn.active {
+  border-color: gold;
+}
+
+.tab-btn i {
+  font-size: 20px;
+  color: pink;
+}
+
+.tab-btn span {
+  font-size: 1.0em;
+  font-weight: bold;
+  color: pink;
+  white-space: nowrap;
+}
+
+.tab-btn:hover i,
+.tab-btn:hover span,
+.tab-btn.active i,
+.tab-btn.active span {
+  color: gold;
+}
+
+/* ========== 主体内容区 ========== */
+main {
+  background-color: blanchedalmond;
+  padding: 15px;
+  text-align: center;
+}
+
+/* ========== 页脚 ========== */
+footer {
+  background-color: #333;
+  color: white;
+  padding: 8px;
+  border-radius: 0 0 8px 8px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* ========== 禁用状态样式 ========== */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #cccccc;
+}
+
+/* ========== 公共卡片样式 ========== */
+.card {
+  background: white;
+  padding: 20px;
+  margin: 10px auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 600px;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ========== 游戏相关样式 ========== */
+#resultHeader {
+  display: none;
+  text-align: center;
+  font-size: 2em;
+  padding: 20px 0;
+  color: pink;
+}
+
+#gameHeader {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  color: pink;
+}
+
+#gameHeader .scores {
+  display: flex;
+  gap: 30px;
+  font-size: 1.2em;
+}
+
+#gameHeader .timer {
+  font-weight: bold;
+}
+
+.players-subtitle {
+  color: #666;
+  text-align: center;
+  margin: 10px 0 20px;
+  font-size: 1.1em;
+}
+
+#quiz-container .card {
+  background: transparent;
+  box-shadow: none;
+}
+
+#victoryPanel {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.options {
+  display: grid;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.options button {
+  padding: 10px;
+  background: #0499ef;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.options button:hover {
+  background: #0066cc;
+}
